@@ -23,7 +23,6 @@ try:
 except ImportError:
     from xml.parsers.expat import ExpatError as XMLError
 
-
 __all__ = [
     'Feeds',
     'Inventory',
@@ -119,6 +118,7 @@ class DataWrapper(object):
     """
     Text wrapper in charge of validating the hash sent by Amazon.
     """
+
     def __init__(self, data, header):
         self.original = data
         self.response = None
@@ -281,9 +281,9 @@ class MWS(object):
         """
         if action not in self.NEXT_TOKEN_OPERATIONS:
             raise MWSError((
-                "{} action not listed in this API's NEXT_TOKEN_OPERATIONS. "
-                "Please refer to documentation."
-            ).format(action))
+                               "{} action not listed in this API's NEXT_TOKEN_OPERATIONS. "
+                               "Please refer to documentation."
+                           ).format(action))
 
         action = '{}ByNextToken'.format(action)
 
@@ -364,7 +364,7 @@ class Feeds(MWS):
         data = dict(Action='GetFeedSubmissionList',
                     MaxCount=max_count,
                     SubmittedFromDate=fromdate,
-                    SubmittedToDate=todate,)
+                    SubmittedToDate=todate, )
         data.update(utils.enumerate_param('FeedSubmissionIdList.Id', feedids))
         data.update(utils.enumerate_param('FeedTypeList.Type.', feedtypes))
         data.update(utils.enumerate_param('FeedProcessingStatusList.Status.', processingstatuses))
@@ -526,7 +526,6 @@ class Orders(MWS):
                     lastupdatedafter=None, lastupdatedbefore=None, orderstatus=(),
                     fulfillment_channels=(), payment_methods=(), buyer_email=None,
                     seller_orderid=None, max_results='100', next_token=None):
-
         data = dict(Action='ListOrders',
                     CreatedAfter=created_after,
                     CreatedBefore=created_before,
@@ -586,6 +585,7 @@ class Products(MWS):
     URI = '/Products/2011-10-01'
     VERSION = '2011-10-01'
     NAMESPACE = '{http://mws.amazonservices.com/schema/Products/2011-10-01}'
+
     # NEXT_TOKEN_OPERATIONS = []
 
     def list_matching_products(self, marketplaceid, query, contextid=None):
@@ -1219,7 +1219,7 @@ class InboundShipments(MWS):
 
     @utils.next_token_action('ListInboundShipments')
     def list_inbound_shipments(self, shipment_ids=None, shipment_statuses=None,
-                               last_updated_after=None, last_updated_before=None,):
+                               last_updated_after=None, last_updated_before=None, ):
         """
         Returns list of shipments based on statuses, IDs, and/or
         before/after datetimes.
@@ -1240,7 +1240,7 @@ class InboundShipments(MWS):
 
     @utils.next_token_action('ListInboundShipmentItems')
     def list_inbound_shipment_items(self, shipment_id=None, last_updated_after=None,
-                                    last_updated_before=None,):
+                                    last_updated_before=None, ):
         """
         Returns list of items within inbound shipments and/or
         before/after datetimes.
@@ -1353,3 +1353,86 @@ class Recommendations(MWS):
             DeprecationWarning,
         )
         return self.list_recommendations(next_token=token)
+
+# * Merchant Fulfillment API * #
+
+
+class MerchantFulfillment(MWS):
+    """ Amazon Merchant Fulfillment API """
+
+    URI = "/MerchantFulfillment/2015-06-01"
+
+
+VERSION = "2015-06-01"
+NS = '{https://mws.amazonservices.com/MerchantFulfillment/2015-06-01}'
+
+# marketplaceids=None, created_after=None, created_before=None,
+# lastupdatedafter=None, lastupdatedbefore=None, orderstatus=(),
+# fulfillment_channels=(), payment_methods=(), buyer_email=None,
+# seller_orderid=None, max_results='100', next_token=None
+
+##  EXAMPLE PARAMS
+# &Action=GetEligibleShippingServices
+# &SellerId=A09087172RPFTMV0PGAN2
+# &SignatureVersion=2
+# &Timestamp=2015-09-23T18%3A36%3A26Z
+# &Version=2015-06-01
+# &Signature=vMf6thsqGxfVy2EZBsH5sBPJxQe6VzKL9jli8eS7tvM%3D
+# &SignatureMethod=HmacSHA256
+
+# &ShipmentRequestDetails.AmazonOrderId=903-9939455-1336669
+# &ShipmentRequestDetails.MustArriveByDate=2015-09-28T07%3A00%3A00Z
+
+# &ShipmentRequestDetails.PackageDimensions.Length=5
+# &ShipmentRequestDetails.PackageDimensions.Width=5
+# &ShipmentRequestDetails.PackageDimensions.Height=5
+# &ShipmentRequestDetails.PackageDimensions.Unit=inches
+
+# &ShipmentRequestDetails.Weight.Value=10
+# &ShipmentRequestDetails.Weight.Unit=ounces
+
+# &ShipmentRequestDetails.ShipDate=2015-09-23T19%3A32%3A08.727Z
+
+# &ShipmentRequestDetails.ShipFromAddress.Name=John%20Doe
+# &ShipmentRequestDetails.ShipFromAddress.AddressLine1=1234%20Westlake%20Ave%20N
+# &ShipmentRequestDetails.ShipFromAddress.City=Seattle
+# &ShipmentRequestDetails.ShipFromAddress.StateOrProvinceCode=WA
+# &ShipmentRequestDetails.ShipFromAddress.PostalCode=98121
+# &ShipmentRequestDetails.ShipFromAddress.CountryCode=US
+# &ShipmentRequestDetails.ShipFromAddress.Email=example%40example.com
+# &ShipmentRequestDetails.ShipFromAddress.Phone=2061234567
+
+# &ShipmentRequestDetails.ShippingServiceOptions.DeliveryExperience=DeliveryConfirmationWithoutSignature
+# &ShipmentRequestDetails.ShippingServiceOptions.CarrierWillPickUp=false
+# &ShipmentRequestDetails.ShippingServiceOptions.DeclaredValue.CurrencyCode=USD
+# &ShipmentRequestDetails.ShippingServiceOptions.DeclaredValue.Amount=10.00
+
+# &ShipmentRequestDetails.ItemList.Item.1.OrderItemId=28207139993814
+# &ShipmentRequestDetails.ItemList.Item.1.Quantity=1
+
+# &ShipmentRequestDetails.LabelCustomization.CustomTextForLabel=Custom text for my label
+# &ShipmentRequestDetails.LabelCustomization.StandardIdForLabel=903-9939455-1336669
+
+
+def get_eligible_shipping_services(self, amazon_order_id=None, seller_orderid=None, item_list=[], ship_from_address={},
+                                   package_dimensions={}, weight={}, must_arrive_by_date=None, ship_date=None,
+                                   shipping_service_options={}, label_customization={}):
+    """ Get eligible shipping services - Merchant fulfillment API """
+
+    data = {
+        "ShipmentRequestDetails.AmazonOrderId": amazon_order_id,
+        "ShipmentRequestDetails.SellerOrderId": seller_orderid,
+        "ShipmentRequestDetails.MustArriveByDate": must_arrive_by_date,
+        "ShipmentRequestDetails.ShipDate": ship_date
+    }
+
+    # "ShipmentRequestDetails.ItemList"
+    # "ShipmentRequestDetails.ShipFromAddress",
+    # "ShipmentRequestDetails.PackageDimensions",
+    # "ShipmentRequestDetails.Weight",
+    # "ShipmentRequestDetails.ShippingServiceOptions",
+    # "ShipmentRequestDetails.LabelCustomization"
+
+    # data.update(utils.enumerate_param('MarketplaceId.Id.', marketplaceids))
+
+    return self.make_request(data)
