@@ -1354,8 +1354,6 @@ class Recommendations(MWS):
         )
         return self.list_recommendations(next_token=token)
 
-# * Merchant Fulfillment API * #
-
 
 # * Merchant Fulfillment API * #
 class MerchantFulfillment(MWS):

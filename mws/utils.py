@@ -67,7 +67,7 @@ class XML2Dict(object):
             key, val = self._namespace_split(key, ObjectDict({'value': val}))
             node_tree[key] = val
         # Save childrens
-        for child in node.getchildren():
+        for child in node:
             tag, tree = self._namespace_split(child.tag,
                                               self._parse_node(child))
             if tag not in node_tree:  # the first time, so store it in dict
@@ -221,8 +221,11 @@ def dict_keyed_param(param, dict_from):
     """
     params = {}
     for k, v in dict_from.items():
+        if type(v) is bool:
+            v = str(v).lower()
+
         params.update({
-            "{param}.{key}".format(param=param, key=k): v
+            "{param}.{key}".format(param=param, key=k): str(v)
         })
     return params
 
