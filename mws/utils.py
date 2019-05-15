@@ -26,6 +26,7 @@ class ObjectDict(dict):
     >>> a.water
     'water'
     """
+
     def __init__(self, initd=None):
         if initd is None:
             initd = {}
@@ -134,7 +135,7 @@ def enumerate_param(param, values):
         param += '.'
     # Return final output: dict comprehension of the enumerated param and values.
     return {
-        '{}{}'.format(param, idx+1): val
+        '{}{}'.format(param, idx + 1): val
         for idx, val in enumerate(values)
     }
 
@@ -197,8 +198,31 @@ def enumerate_keyed_param(param, values):
     for idx, val_dict in enumerate(values):
         # Build the final output.
         params.update({
-            '{param}{idx}.{key}'.format(param=param, idx=idx+1, key=k): v
+            '{param}{idx}.{key}'.format(param=param, idx=idx + 1, key=k): v
             for k, v in val_dict.items()
+        })
+    return params
+
+
+def dict_keyed_param(param, dict_from):
+    """
+    Given a param string and a dict, returns a flat dict of keyed params without enumerate.
+     Example:
+        param = "ShipmentRequestDetails.PackageDimensions"
+        dict_from = {'Length': 5, 'Width': 5, 'Height': 5, 'Unit': 'inches'}
+     Returns:
+        {
+            'ShipmentRequestDetails.PackageDimensions.Length': 5,
+            'ShipmentRequestDetails.PackageDimensions.Width': 5,
+            'ShipmentRequestDetails.PackageDimensions.Height': 5,
+            'ShipmentRequestDetails.PackageDimensions.Unit': 'inches',
+            ...
+        }
+    """
+    params = {}
+    for k, v in dict_from.items():
+        params.update({
+            "{param}.{key}".format(param=param, key=k): v
         })
     return params
 
@@ -240,6 +264,7 @@ def next_token_action(action_name):
     Only the `next_token` kwarg is consumed by the "next" call:
     all other args and kwargs are ignored and not required.
     """
+
     def _decorator(request_func):
         @wraps(request_func)
         def _wrapped_func(self, *args, **kwargs):
@@ -248,7 +273,9 @@ def next_token_action(action_name):
                 # Token captured: run the "next" action.
                 return self.action_by_next_token(action_name, next_token)
             return request_func(self, *args, **kwargs)
+
         return _wrapped_func
+
     return _decorator
 
 
